@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "./supabase";
 
+// 타입 정의 수정
+type Image = {
+  name: string;
+  id: string;
+  created_at: string;
+  // size 제거 또는 옵셔널로 변경
+};
+
 interface ImageModalProps {
   imageUrl: string;
   alt: string;
@@ -8,6 +16,13 @@ interface ImageModalProps {
 }
 
 const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, alt, onClose }) => {
+  // React.MouseEvent 타입 명시
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -31,7 +46,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, alt, onClose }) => {
         zIndex: 1000,
         cursor: 'zoom-out'
       }}
-      onClick={onClose}
+      onClick={handleBackdropClick}
     >
       <img
         src={imageUrl}
@@ -42,14 +57,13 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, alt, onClose }) => {
           objectFit: 'contain',
           cursor: 'zoom-out'
         }}
-        onClick={(e) => e.stopPropagation()}
       />
     </div>
   );
 };
 
 export default function ImageManager() {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<Image[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -132,14 +146,13 @@ export default function ImageManager() {
       }
       
       if (listData) {
-        setImages(listData.map((img) => img.name));
+        setImages(listData as Image[]); // 타입 캐스팅 추가
         
-        // 각 이미지에 대해 서명된 URL 생성
         const urls: {[key: string]: string} = {};
         for (const img of listData) {
           const { data: signedData, error: signedError } = await supabase.storage
             .from("images")
-            .createSignedUrl(img.name, 3600); // 1시간 동안 유효
+            .createSignedUrl(img.name, 3600);
 
           if (signedError) {
             console.error(`${img.name} 서명 URL 생성 중 에러:`, signedError);
@@ -184,7 +197,7 @@ export default function ImageManager() {
       if (error) throw error;
       
       // 삭제 후 이미지 목록과 URL 상태 업데이트
-      setImages(prev => prev.filter(img => img !== imageName));
+      setImages(prev => prev.filter(img => img.name !== imageName));
       setImageUrls(prev => {
         const newUrls = { ...prev };
         delete newUrls[imageName];
@@ -265,7 +278,7 @@ export default function ImageManager() {
       }}>
         {images.map((img) => (
           <div 
-            key={img}
+            key={img.name}
             style={{
               border: '1px solid #ddd',
               borderRadius: '8px',
@@ -285,12 +298,12 @@ export default function ImageManager() {
                 position: 'relative',
                 cursor: 'zoom-in'
               }}
-              onClick={() => setSelectedImage(imageUrls[img])}
+              onClick={() => setSelectedImage(imageUrls[img.name])}
             >
-              {imageUrls[img] && (
+              {imageUrls[img.name] && (
                 <img 
-                  src={imageUrls[img]}
-                  alt={img}
+                  src={imageUrls[img.name]}
+                  alt={img.name}
                   style={{
                     width: '100%',
                     height: '100%',
@@ -298,7 +311,7 @@ export default function ImageManager() {
                     transition: 'transform 0.3s ease',
                   }}
                   onError={(e) => {
-                    console.error(`이미지 로드 실패: ${img}`);
+                    console.error(`이미지 로드 실패: ${img.name}`);
                     e.currentTarget.src = 'https://via.placeholder.com/200?text=Error';
                   }}
                   onMouseEnter={(e) => {
@@ -316,7 +329,7 @@ export default function ImageManager() {
               alignItems: 'center'
             }}>
               <a 
-                href={imageUrls[img]}
+                href={imageUrls[img.name]}
                 target="_blank" 
                 rel="noopener noreferrer"
                 style={{
@@ -326,10 +339,10 @@ export default function ImageManager() {
                   maxWidth: '70%'
                 }}
               >
-                {img}
+                {img.name}
               </a>
               <button 
-                onClick={() => handleDelete(img)}
+                onClick={() => handleDelete(img.name)}
                 style={{
                   padding: '4px 8px',
                   background: '#ff4444',
