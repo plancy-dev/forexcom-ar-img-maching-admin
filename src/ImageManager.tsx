@@ -208,11 +208,6 @@ export default function ImageManager() {
     }
   }
 
-  function getImageUrl(imageName: string) {
-    const { data } = supabase.storage.from("images").getPublicUrl(imageName);
-    return data.publicUrl;
-  }
-
   if (loading) {
     return <div>로딩중...</div>;
   }
