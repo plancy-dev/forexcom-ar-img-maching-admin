@@ -58,12 +58,26 @@ export const useImageMutations = () => {
           supabase.from('images').delete().eq('id', image.id)
         ]);
       }
+      return image;
+    },
+    onMutate: async (deletedImage) => {
+      const previousImages = queryClient.getQueryData(['images']);
+      
+      queryClient.setQueryData(['images'], (old: any) => ({
+        ...old,
+        images: old?.images?.filter((img: ImageRecord) => img.id !== deletedImage.id) || []
+      }));
+
+      return { previousImages };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['images'] });
       toast.success("이미지가 삭제되었습니다.");
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      if (context?.previousImages) {
+        queryClient.setQueryData(['images'], context.previousImages);
+      }
       console.error("삭제 오류:", error);
       toast.error("파일 삭제 중 오류가 발생했습니다.");
     }

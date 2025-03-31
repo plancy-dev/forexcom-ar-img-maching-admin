@@ -185,6 +185,11 @@ export default function ImageManager() {
     );
   }, [signedUrls.data, parsedMetadata, handleOCR, images]);
 
+  // 전체 로딩 상태를 통합적으로 관리
+  const isPageLoading = signedUrls.isLoading || deleteMutation.isPending || ocrMutation.isPending || uploadMutation.isPending;
+
+  console.info(signedUrls.isLoading,deleteMutation.isPending,ocrMutation.isPending,uploadMutation.isPending)
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -231,7 +236,7 @@ export default function ImageManager() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {signedUrls.isLoading ? (
+              {isPageLoading ? (
                 Array(ITEMS_PER_PAGE).fill(0).map((_, index) => (
                   <ImageRowSkeleton key={index} />
                 ))
