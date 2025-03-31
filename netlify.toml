@@ -1,21 +1,33 @@
 # example netlify.toml
 [build]
-  command = "yarn run build"
+  command = "yarn build"
   functions = "netlify/functions"
-  publish = "build"
+  publish = "dist"
 
-  ## Uncomment to use this redirect for Single Page Applications like create-react-app.
-  ## Not needed for static site generators.
-  #[[redirects]]
-  #  from = "/*"
-  #  to = "/index.html"
-  #  status = 200
+# Netlify의 SPA 지원을 위한 리다이렉트 설정
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
-  ## (optional) Settings for Netlify Dev
-  ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
-  #[dev]
-  #  command = "yarn start" # Command to start your dev server
-  #  port = 3000 # Port that the dev server will be listening on
-  #  publish = "dist" # Folder with the static content for _redirect file
+## Uncomment to use this redirect for Single Page Applications like create-react-app.
+## Not needed for static site generators.
+#[[redirects]]
+#  from = "/*"
+#  to = "/index.html"
+#  status = 200
 
-  ## more info on configuring this file: https://ntl.fyi/file-based-build-config
+## (optional) Settings for Netlify Dev
+## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
+#[dev]
+#  command = "yarn start" # Command to start your dev server
+#  port = 3000 # Port that the dev server will be listening on
+#  publish = "dist" # Folder with the static content for _redirect file
+
+## more info on configuring this file: https://ntl.fyi/file-based-build-config
+
+# 환경 변수 설정 예시 (실제 값은 Netlify 대시보드에서 설정)
+[context.production.environment]
+  VITE_SUPABASE_URL="https://kvseqxxxwtqvyuygcvjm.supabase.co"
+  VITE_SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2c2VxeHh4d3Rxdnl1eWdjdmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyNzE3ODcsImV4cCI6MjA1Nzg0Nzc4N30.FvUFfMBFd1BX3B4nLkwA4huSyrRYlrYupWEDo2HMUaM"
+  VITE_GOOGLE_VISION_API_KEY="AIzaSyABhFvwoVE0t_lKsuCxc3-Tm_A6Xp6GmR8"
