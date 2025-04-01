@@ -63,7 +63,7 @@ export const useImageMutations = () => {
     onMutate: async (deletedImage) => {
       const previousImages = queryClient.getQueryData(['images']);
       
-      queryClient.setQueryData(['images'], (old: any) => ({
+      queryClient.setQueryData(['images'], (old: { images: ImageRecord[] }) => ({
         ...old,
         images: old?.images?.filter((img: ImageRecord) => img.id !== deletedImage.id) || []
       }));

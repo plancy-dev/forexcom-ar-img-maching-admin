@@ -1,7 +1,7 @@
 // src/hooks/useOCR.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { ImageRecord } from '../types';
+import { ImageRecord, ImageMetadata } from '../types';
 import { toast } from 'react-toastify';
 
 interface OCRParams {
@@ -10,7 +10,7 @@ interface OCRParams {
 }
 
 export const useOCR = (
-  parsedMetadata: Record<number, any>,
+  parsedMetadata: Record<number, ImageMetadata>,
   onSuccess?: (image: ImageRecord) => void
 ) => {
   const queryClient = useQueryClient();
@@ -64,17 +64,20 @@ export const useOCR = (
       return updatedImage;
     },
     onSuccess: (updatedImage) => {
-
-      console.info(updatedImage)
       // 이미지 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ['images'] });
       // 성공 콜백 실행
       onSuccess?.(updatedImage);
       toast.success("OCR 처리가 완료되었습니다.");
     },
-    onError: (error: any) => {
-      console.error("OCR 오류:", error);
-      toast.error(error.message || "OCR 처리 중 오류가 발생했습니다.");
+    onError: (error: unknown) => {
+      if (error instanceof Error) {
+        console.error("OCR 오류:", error);
+        toast.error(error.message || "OCR 처리 중 오류가 발생했습니다.");
+      } else {
+        console.error("OCR 오류:", error);
+        toast.error("OCR 처리 중 오류가 발생했습니다.");
+      }
     }
   });
 };
